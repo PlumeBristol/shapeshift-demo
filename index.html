@@ -645,16 +645,53 @@
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
     }
     .dropzone {
+      position: relative;
       border: 1px dashed rgba(124, 108, 255, 0.5);
       border-radius: 12px;
       padding: 28px 20px;
       text-align: center;
       background: rgba(124, 108, 255, 0.05);
-      transition: border-color 420ms ease, background 420ms ease, transform 420ms ease;
+      min-height: 130px;
+      transition: border-color 420ms ease, background 420ms ease;
     }
-    .scene.active .dropzone.has-file {
+    .dropzone.filled {
       border-color: var(--primary);
       background: rgba(124, 108, 255, 0.12);
+    }
+    .dropzone-empty, .dropzone-file {
+      transition: opacity 320ms ease;
+    }
+    .dropzone-file {
+      position: absolute;
+      inset: 28px 20px;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .dropzone.filled .dropzone-empty { opacity: 0; }
+    .dropzone.filled .dropzone-file  { opacity: 1; }
+
+    /* Cursor that "drops" the file onto the zone. Starts bottom-right,
+       animates up-left to land over the dropzone centre, then pulses. */
+    .drop-cursor {
+      position: absolute;
+      right: 14%;
+      bottom: 10%;
+      width: 24px;
+      height: 24px;
+      opacity: 0;
+      transform: translate(40px, 28px) rotate(-8deg);
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+      pointer-events: none;
+      z-index: 5;
+      transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 240ms ease;
+    }
+    .drop-cursor.show { opacity: 1; }
+    .drop-cursor.land {
+      transform: translate(-80px, -60px) rotate(-8deg);
+    }
+    .drop-cursor.release {
+      transform: translate(-80px, -60px) scale(0.85) rotate(-8deg);
     }
     .dropzone .big-icon {
       font-size: 36px;
@@ -812,44 +849,46 @@
       letter-spacing: 0.05em;
     }
 
-    /* -------- Opening scene (slash → H1 → type → retype → final) --------
-       Phase 1: slash + menu + typed H1 live in a left-aligned panel
-                (no frame, just sits on the stage).
-       Phase 2: fade phase 1 out, fade a centred final sentence in. */
+    /* -------- Opening scene (slash → H1 → type → retype, all centred) --------
+       Slash prefix and H1 occupy the same absolutely-positioned slot so
+       the heading lands in the exact pixel where "/" was. Menu sits
+       directly under. Everything is centred on the stage. No fade-and-
+       move; the final sentence is typed where it stays. */
     .opening-stage {
       position: relative;
       width: 100%;
       min-height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .opening-compose {
-      position: absolute;
-      left: 64px;
-      top: 56px;
-      max-width: 640px;
-      opacity: 1;
-      transition: opacity 520ms ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      max-width: 95vw;
     }
-    .opening-compose.fade-out { opacity: 0; }
-
-    /* Shared slot — both the "/" prefix and the H1 occupy the same line
-       so when the slash command is accepted, the H1 takes its place
-       rather than dropping down a row. */
     .opening-line-slot {
       position: relative;
-      min-height: clamp(36px, 4vw, 52px);
-      margin-bottom: 14px;
+      min-height: clamp(36px, 4vw, 60px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .opening-slash-line,
     .opening-h1 {
       position: absolute;
-      top: 0;
-      left: 0;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
       transition: opacity 260ms ease;
     }
     .opening-slash-line {
-      font-size: clamp(28px, 3.4vw, 44px);
+      font-size: clamp(28px, 3.6vw, 52px);
       color: var(--fg-75);
-      line-height: 1.12;
+      line-height: 1.1;
       opacity: 0;
     }
     .opening-slash-line.show { opacity: 1; }
@@ -883,11 +922,10 @@
     }
     .opening-h1 {
       font-weight: 600;
-      font-size: clamp(28px, 3.4vw, 44px);
-      line-height: 1.12;
+      font-size: clamp(28px, 3.6vw, 52px);
+      line-height: 1.1;
       letter-spacing: -0.02em;
       color: var(--fg);
-      text-align: left;
       opacity: 0;
     }
     .opening-h1.show { opacity: 1; }
@@ -899,33 +937,6 @@
       vertical-align: text-bottom;
       margin-left: 4px;
       animation: caret 1s steps(2) infinite;
-    }
-    /* Phase 2: final sentence — pinned to one line, centred. Font size
-       clamps down on narrow viewports via vw so it always fits on a
-       single row no matter the stage width. */
-    .opening-final {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 0 24px;
-      font-weight: 600;
-      font-size: clamp(24px, 3.2vw, 52px);
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      color: var(--fg);
-      white-space: nowrap;
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity 620ms cubic-bezier(0.2, 0.7, 0.2, 1),
-                  transform 620ms cubic-bezier(0.2, 0.7, 0.2, 1);
-      pointer-events: none;
-    }
-    .opening-final.show {
-      opacity: 1;
-      transform: translateY(0);
     }
 
     /* -------- "No prompt" — gap suggestion card -------- */
@@ -1287,14 +1298,16 @@
 <body>
   <div class="stage" id="stage">
 
-    <!-- Scene 1: opening. Phase 1 — compose on the left (type "/", pick
-         Heading 1, type "Creating courses just got easy", retype
-         "effortless"). Phase 2 — fade the compose out and reveal the
-         finished sentence centred. -->
-    <section class="scene" data-scene="0" data-duration="9500">
+    <!-- Scene 1: opening. Meta-opener: user types "/", picks Heading 1,
+         types "Creating courses just got easy", then backspaces "easy"
+         and types "effortless". Everything happens centred. -->
+    <section class="scene" data-scene="0" data-duration="9000">
       <div class="opening-stage">
         <div class="opening-compose" id="opening-compose">
-          <div class="opening-slash-line" id="opening-slash-line">/<span class="caret"></span></div>
+          <div class="opening-line-slot">
+            <div class="opening-slash-line" id="opening-slash-line">/<span class="caret"></span></div>
+            <div class="opening-h1" id="opening-h1"><span id="opening-retype"></span><span class="caret"></span></div>
+          </div>
           <div class="opening-slash-menu" id="opening-slash-menu">
             <div class="slash-item primary" id="opening-h1-item">
               Heading 1
@@ -1309,10 +1322,6 @@
               <span class="desc">Unordered list</span>
             </div>
           </div>
-          <div class="opening-h1" id="opening-h1"><span id="opening-retype"></span><span class="caret"></span></div>
-        </div>
-        <div class="opening-final" id="opening-final">
-          Creating courses just got <span class="gradient-word">effortless</span>
         </div>
       </div>
     </section>
@@ -1352,19 +1361,30 @@
         </div>
         <div class="right">
           <div class="upload-card" id="upload-scene">
-            <div class="dropzone has-file" id="upload-dropzone">
-              <div class="big-icon">📄</div>
-              <div class="fname">Intro deck.pptx</div>
-              <div class="fmeta">3.4 MB · 28 slides</div>
+            <div class="dropzone" id="upload-dropzone">
+              <div class="drop-cursor" id="upload-drop-cursor" aria-hidden>
+                <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 3 L19 11 L11.5 12 L9 19 Z" fill="#fff" stroke="#09090f" stroke-width="1.4" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="dropzone-empty" id="upload-empty">
+                <div class="big-icon">⇪</div>
+                <div class="fname" style="color: var(--fg-75);">Drop a file here</div>
+              </div>
+              <div class="dropzone-file" id="upload-file">
+                <div class="big-icon">📄</div>
+                <div class="fname">Intro deck.pptx</div>
+                <div class="fmeta">3.4 MB · 28 slides</div>
+              </div>
             </div>
             <div class="upload-arrow">↓</div>
             <div class="generated-outline">
-              <div class="outline-row section" data-delay="1600"><span class="ico ico-section"></span>&nbsp;&nbsp;Foundations of ethics</div>
-              <div class="outline-row nested" data-delay="1850"><span class="ico ico-lesson"></span>&nbsp;&nbsp;What ethics means</div>
-              <div class="outline-row nested" data-delay="2050"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Branches of the field</div>
-              <div class="outline-row nested" data-delay="2250"><span class="ico ico-quiz"></span>&nbsp;&nbsp;Foundations check</div>
-              <div class="outline-row section" data-delay="2500"><span class="ico ico-section"></span>&nbsp;&nbsp;Real-world dilemmas</div>
-              <div class="outline-row nested" data-delay="2700"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Workplace scenarios</div>
+              <div class="outline-row section" data-delay="2600"><span class="ico ico-section"></span>&nbsp;&nbsp;Foundations of ethics</div>
+              <div class="outline-row nested" data-delay="2850"><span class="ico ico-lesson"></span>&nbsp;&nbsp;What ethics means</div>
+              <div class="outline-row nested" data-delay="3050"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Branches of the field</div>
+              <div class="outline-row nested" data-delay="3250"><span class="ico ico-quiz"></span>&nbsp;&nbsp;Foundations check</div>
+              <div class="outline-row section" data-delay="3500"><span class="ico ico-section"></span>&nbsp;&nbsp;Real-world dilemmas</div>
+              <div class="outline-row nested" data-delay="3700"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Workplace scenarios</div>
             </div>
           </div>
         </div>
@@ -1578,43 +1598,55 @@
       </div>
     </section>
 
-    <!-- Scene: no-prompt generation (AI fills gaps from context alone) -->
+    <!-- Scene: Shapeshift suggests a missing block, user accepts. -->
     <section class="scene" data-scene="7" data-duration="8500">
       <div class="split">
         <div class="left">
           <div class="kt">
             <div class="row headline">
-              <span class="w">No</span>
+              <span class="w">Fills</span>
+              <span class="w">in</span>
+              <span class="w">the</span>
+              <span class="w">gaps,</span>
+              <span class="w gradient-word">without</span>
+              <span class="w">a</span>
               <span class="w">prompt.</span>
-              <span class="w gradient-word">Still</span>
-              <span class="w">works.</span>
             </div>
             <div class="row subhead">
-              <span class="w">AI</span>
-              <span class="w">reads</span>
+              <span class="w">Shapeshift</span>
+              <span class="w">spots</span>
               <span class="w">the</span>
-              <span class="w">rest</span>
-              <span class="w">of</span>
-              <span class="w">the</span>
-              <span class="w">course</span>
+              <span class="w">gaps</span>
+              <span class="w">in</span>
+              <span class="w">your</span>
+              <span class="w">course,</span>
               <span class="w">and</span>
-              <span class="w">fills</span>
-              <span class="w">the</span>
-              <span class="w">gaps.</span>
+              <span class="w">fixes</span>
+              <span class="w">them.</span>
             </div>
           </div>
         </div>
         <div class="right">
-          <div class="autofill-card" id="autofill-scene">
-            <div class="autofill-header">
-              <div class="autofill-title">Foundations of ethics</div>
-              <div class="autofill-sub"><span class="spark">✦</span> Auto-filling from course context</div>
+          <div class="editor-card" id="gap-scene" style="min-height: 360px; padding: 24px 28px;">
+            <div class="ai-block ai-p in" style="margin-bottom: 10px;">
+              Ethics is the study of right and wrong — the principles that guide human action.
             </div>
-            <div class="outline-row nested"><span class="ico ico-lesson"></span>&nbsp;&nbsp;What ethics means</div>
-            <div class="outline-row nested autofill-empty" data-placeholder="Untitled lesson" data-fill="Normative vs descriptive ethics"><span class="ico ico-lesson"></span>&nbsp;&nbsp;<span class="autofill-text">Untitled lesson</span></div>
-            <div class="outline-row nested"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Branches of the field</div>
-            <div class="outline-row nested autofill-empty" data-placeholder="Untitled quiz" data-fill="Foundations check"><span class="ico ico-quiz"></span>&nbsp;&nbsp;<span class="autofill-text">Untitled quiz</span></div>
-            <div class="outline-row nested"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Workplace scenarios</div>
+            <div class="suggestion-block" id="gap-suggestion">
+              <span class="suggestion-spark">✦</span>
+              <div class="suggestion-content">
+                <div class="suggestion-label">Suggested · Quote</div>
+                <div class="suggestion-preview">
+                  "Act only according to that maxim whereby you can will that it should become a universal law." — Kant
+                </div>
+              </div>
+              <div class="suggestion-actions">
+                <button class="sug-btn sug-accept" id="gap-accept">✓</button>
+                <button class="sug-btn sug-dismiss">×</button>
+              </div>
+            </div>
+            <div class="ai-block ai-p in">
+              Every framework you'll meet is a different lens on what "right" means in practice.
+            </div>
           </div>
         </div>
       </div>
@@ -1728,8 +1760,27 @@
       sceneStart = performance.now();
       if (indicator) indicator.textContent = `${idx + 1} / ${scenes.length}`;
 
-      // Outline rows fade in per data-delay
       const scene = scenes[idx];
+
+      // File-upload scene: a cursor sweeps in, "drops" the file into the
+      // dropzone, and the outline populates below. Reset the dropzone to
+      // its empty state so the loop replays cleanly.
+      const dropzone = scene.querySelector('#upload-dropzone');
+      const dropCursor = scene.querySelector('#upload-drop-cursor');
+      if (dropzone && dropCursor) {
+        dropzone.classList.remove('filled');
+        dropCursor.classList.remove('show', 'land', 'release');
+        // Cursor fades in, drags toward the dropzone, drops the file.
+        setTimeout(() => dropCursor.classList.add('show'), 300);
+        setTimeout(() => dropCursor.classList.add('land'), 500);
+        setTimeout(() => {
+          dropzone.classList.add('filled');
+          dropCursor.classList.add('release');
+        }, 1500);
+        setTimeout(() => dropCursor.classList.remove('show'), 1900);
+      }
+
+      // Outline rows fade in per data-delay
       scene.querySelectorAll('.outline-row[data-delay]').forEach(row => {
         row.classList.remove('in');
         const d = Number(row.dataset.delay);
@@ -1787,17 +1838,12 @@
       // types the headline ("Creating courses just got easy"), then
       // backspaces "easy" and retypes "effortless". The demo's own
       // opener is written using the product it's selling.
-      const compose   = scene.querySelector('#opening-compose');
       const slashLine = scene.querySelector('#opening-slash-line');
       const slashMenu = scene.querySelector('#opening-slash-menu');
       const h1Item    = scene.querySelector('#opening-h1-item');
       const h1        = scene.querySelector('#opening-h1');
       const retype    = scene.querySelector('#opening-retype');
-      const finalEl   = scene.querySelector('#opening-final');
       if (slashLine && slashMenu && h1 && retype) {
-        // Reset phase-2 too.
-        compose?.classList.remove('fade-out');
-        finalEl?.classList.remove('show');
         // Reset
         slashLine.classList.remove('show');
         slashMenu.classList.remove('show', 'hide');
@@ -1839,11 +1885,6 @@
           }, t);
           t += 82;
         }
-        // Phase 2: after a brief hold on the finished typed line, fade the
-        // left composer out and reveal the same sentence centred on the stage.
-        t += 700;
-        setTimeout(() => compose?.classList.add('fade-out'), t);
-        setTimeout(() => finalEl?.classList.add('show'), t + 260);
       }
 
       // AI writer scene: skeleton for ~1.6s, then a lesson materialises
@@ -1869,28 +1910,22 @@
         }, 2200);
       }
 
-      // No-prompt generation scene: two "Untitled" rows fill themselves in
-      // using only the surrounding course as context. Each empty row resets
-      // to its placeholder, then clears and types out its generated title.
-      if (scene.querySelector('#autofill-scene')) {
-        const empties = Array.from(scene.querySelectorAll('.autofill-empty'));
-        empties.forEach(row => {
-          const textEl = row.querySelector('.autofill-text');
-          textEl.textContent = row.dataset.placeholder || 'Untitled';
-          row.classList.remove('filled');
-        });
-        empties.forEach((row, idx) => {
-          const textEl = row.querySelector('.autofill-text');
-          const target = row.dataset.fill || '';
-          const startAt = 1400 + idx * 2600;
+      // Gap-suggestion scene: a ghost block between two paragraphs slides
+      // in, Shapeshift is recommending content. The accept button pulses,
+      // then the ghost collapses into a real quote block.
+      if (scene.querySelector('#gap-scene')) {
+        const suggestion = scene.querySelector('#gap-suggestion');
+        const acceptBtn  = scene.querySelector('#gap-accept');
+        if (suggestion && acceptBtn) {
+          suggestion.classList.remove('show', 'accepted');
+          acceptBtn.classList.remove('pulsing');
+          setTimeout(() => suggestion.classList.add('show'), 1500);
+          setTimeout(() => acceptBtn.classList.add('pulsing'), 3100);
           setTimeout(() => {
-            textEl.textContent = '';
-            row.classList.add('filled');
-          }, startAt);
-          for (let i = 1; i <= target.length; i++) {
-            setTimeout(() => { textEl.textContent = target.slice(0, i); }, startAt + 160 + i * 38);
-          }
-        });
+            acceptBtn.classList.remove('pulsing');
+            suggestion.classList.add('accepted');
+          }, 4500);
+        }
       }
 
       // Reusability scene: user physically types the edit on the source
