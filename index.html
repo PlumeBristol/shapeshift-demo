@@ -1039,7 +1039,65 @@
       </div>
     </section>
 
-    <!-- Scene 2: structure + visible reorder (merged) -->
+    <!-- Scene: course from a file (opening hook) -->
+    <section class="scene" data-scene="1" data-duration="7500">
+      <div class="split">
+        <div class="left">
+          <div class="kt">
+            <div class="row headline">
+              <span class="w">Start</span>
+              <span class="w">from</span>
+              <span class="w">a</span>
+              <span class="w gradient-word">deck.</span>
+              <span class="w">Or</span>
+              <span class="w">a</span>
+              <span class="w">brief.</span>
+              <span class="w">Or</span>
+              <span class="w">nothing</span>
+              <span class="w">at</span>
+              <span class="w">all.</span>
+            </div>
+            <div class="row subhead">
+              <span class="w">Drop</span>
+              <span class="w">a</span>
+              <span class="w">document</span>
+              <span class="w">and</span>
+              <span class="w">get</span>
+              <span class="w">a</span>
+              <span class="w">whole</span>
+              <span class="w">course — </span>
+              <span class="w">sections,</span>
+              <span class="w">lessons,</span>
+              <span class="w">and</span>
+              <span class="w">quizzes</span>
+              <span class="w">to</span>
+              <span class="w">shape</span>
+              <span class="w">from.</span>
+            </div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="upload-card" id="upload-scene">
+            <div class="dropzone has-file" id="upload-dropzone">
+              <div class="big-icon">📄</div>
+              <div class="fname">Intro deck.pptx</div>
+              <div class="fmeta">3.4 MB · 28 slides</div>
+            </div>
+            <div class="upload-arrow">↓</div>
+            <div class="generated-outline">
+              <div class="outline-row section" data-delay="1600"><span class="ico ico-section"></span>&nbsp;&nbsp;Foundations of ethics</div>
+              <div class="outline-row nested" data-delay="1850"><span class="ico ico-lesson"></span>&nbsp;&nbsp;What ethics means</div>
+              <div class="outline-row nested" data-delay="2050"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Branches of the field</div>
+              <div class="outline-row nested" data-delay="2250"><span class="ico ico-quiz"></span>&nbsp;&nbsp;Foundations check</div>
+              <div class="outline-row section" data-delay="2500"><span class="ico ico-section"></span>&nbsp;&nbsp;Real-world dilemmas</div>
+              <div class="outline-row nested" data-delay="2700"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Workplace scenarios</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene: structure + visible reorder (merged) -->
     <section class="scene" data-scene="1" data-duration="8500">
       <div class="split">
         <div class="left">
@@ -1195,55 +1253,6 @@
               <div class="ai-block ai-bullet">Which principle takes precedence if they conflict?</div>
               <div class="ai-block ai-bullet">What would you defend in public?</div>
               <div class="ai-block ai-p">Every framework you'll meet in this course is a different lens on those three questions.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Scene: course from a file -->
-    <section class="scene" data-scene="5" data-duration="7000">
-      <div class="split">
-        <div class="left">
-          <div class="kt">
-            <div class="row headline">
-              <span class="w">Start</span>
-              <span class="w">from</span>
-              <span class="w">a</span>
-              <span class="w gradient-word">deck.</span>
-              <span class="w">Or</span>
-              <span class="w">a</span>
-              <span class="w">brief.</span>
-              <span class="w">Or</span>
-              <span class="w">anything.</span>
-            </div>
-            <div class="row subhead">
-              <span class="w">Drop</span>
-              <span class="w">a</span>
-              <span class="w">document</span>
-              <span class="w">and</span>
-              <span class="w">get</span>
-              <span class="w">a</span>
-              <span class="w">structured</span>
-              <span class="w">course.</span>
-            </div>
-          </div>
-        </div>
-        <div class="right">
-          <div class="upload-card" id="upload-scene">
-            <div class="dropzone has-file" id="upload-dropzone">
-              <div class="big-icon">📄</div>
-              <div class="fname">Intro deck.pptx</div>
-              <div class="fmeta">3.4 MB · 28 slides</div>
-            </div>
-            <div class="upload-arrow">↓</div>
-            <div class="generated-outline">
-              <div class="outline-row section" data-delay="1600"><span class="ico ico-section"></span>&nbsp;&nbsp;Foundations of ethics</div>
-              <div class="outline-row nested" data-delay="1850"><span class="ico ico-lesson"></span>&nbsp;&nbsp;What ethics means</div>
-              <div class="outline-row nested" data-delay="2050"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Branches of the field</div>
-              <div class="outline-row nested" data-delay="2250"><span class="ico ico-quiz"></span>&nbsp;&nbsp;Foundations check</div>
-              <div class="outline-row section" data-delay="2500"><span class="ico ico-section"></span>&nbsp;&nbsp;Real-world dilemmas</div>
-              <div class="outline-row nested" data-delay="2700"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Workplace scenarios</div>
             </div>
           </div>
         </div>
@@ -1455,7 +1464,9 @@
       // Merged structure + reorder scene (document index 1):
       // let the cascade finish, then lift a row and slot it back to show
       // "rearrange and the rest makes room" without calling out drag.
-      if (idx === 1) {
+      // Structure scene is now the 3rd scene (idx 2) after the file-upload
+      // hook was moved to position 2.
+      if (idx === 2) {
         const row = scene.querySelector('#drag-row');
         if (row) {
           // Swap-visualisation sequence on the merged structure scene:
@@ -1489,9 +1500,9 @@
         }
       }
 
-      // Scene 3 (slash menu) → handoff to scene 4 (AI): at the very end,
-      // glow the "Create with AI" item as if the user clicked it.
-      if (idx === 2) {
+      // Slash-menu scene (now idx 3) → handoff to AI lesson scene (idx 4):
+      // at the very end, glow the "Create with AI" item as if clicked.
+      if (idx === 3) {
         const aiItem = scene.querySelector('.slash-item.primary');
         aiItem?.classList.remove('glow');
         setTimeout(() => aiItem?.classList.add('glow'), 4200);
