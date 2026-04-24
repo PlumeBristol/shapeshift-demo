@@ -830,20 +830,46 @@
       color: var(--muted);
       margin-top: 4px;
     }
-    .reuse-edit-tag {
+    /* Editable word flash + blinking caret on the source lesson. */
+    .reuse-word {
       display: inline-block;
-      margin-left: 10px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(126, 252, 224, 0.18);
-      color: var(--accent);
-      font-size: 11px;
-      font-weight: 600;
-      opacity: 0;
-      transform: translateX(-6px);
-      transition: opacity 320ms ease, transform 320ms ease;
+      padding: 0 3px;
+      border-radius: 3px;
+      transition: background 420ms ease, color 420ms ease;
     }
-    .scene.active .reuse-edit-tag { opacity: 1; transform: translateX(0); transition-delay: 1600ms; }
+    .reuse-word.edited {
+      background: rgba(126, 252, 224, 0.22);
+      color: var(--accent);
+      animation: reuse-flash 720ms ease;
+    }
+    @keyframes reuse-flash {
+      0%   { background: rgba(126, 252, 224, 0.55); }
+      100% { background: rgba(126, 252, 224, 0.22); }
+    }
+    .reuse-caret {
+      display: inline-block;
+      width: 2px;
+      height: 0.9em;
+      background: var(--accent);
+      vertical-align: text-bottom;
+      margin-left: 3px;
+      opacity: 0;
+      animation: caret 1s steps(2) infinite;
+    }
+    .scene.active .reuse-caret { opacity: 1; animation-delay: 1200ms; }
+    .reuse-course-name {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .reuse-course-lesson {
+      font-size: 13px;
+      color: var(--fg);
+      line-height: 1.4;
+    }
 
     .reuse-courses {
       display: grid;
@@ -866,27 +892,6 @@
     .scene.active .reuse-course:nth-child(1) { transition-delay: 600ms; }
     .scene.active .reuse-course:nth-child(2) { transition-delay: 760ms; }
     .scene.active .reuse-course:nth-child(3) { transition-delay: 920ms; }
-    .scene.active .reuse-course.updated {
-      border-color: rgba(126, 252, 224, 0.5);
-      color: var(--fg);
-    }
-    .reuse-course .ping {
-      display: inline-block;
-      margin-right: 6px;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      vertical-align: middle;
-      opacity: 0;
-    }
-    .scene.active .reuse-course.updated .ping {
-      opacity: 1;
-      animation: pulse 1.4s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(126, 252, 224, 0.5); }
-      50% { box-shadow: 0 0 0 6px rgba(126, 252, 224, 0); }
-    }
 
     /* Quality-of-life roundup card */
     .qol-card {
@@ -1334,14 +1339,25 @@
         <div class="right">
           <div class="reuse-stage" id="reuse-scene">
             <div class="reuse-source">
-              <div class="label">Lesson <span class="reuse-edit-tag">Edited</span></div>
-              <div class="title">What is ethics?</div>
-              <div class="hint">Used in 3 courses · saved just now</div>
+              <div class="label">Lesson · Source</div>
+              <div class="title">
+                What is <span class="reuse-word" data-reuse-role="master">ethics</span>?<span class="reuse-caret"></span>
+              </div>
+              <div class="hint">Used in 3 courses</div>
             </div>
             <div class="reuse-courses">
-              <div class="reuse-course"><span class="ping"></span>Intro to Ethics</div>
-              <div class="reuse-course"><span class="ping"></span>Leadership 101</div>
-              <div class="reuse-course"><span class="ping"></span>Onboarding</div>
+              <div class="reuse-course">
+                <div class="reuse-course-name">Intro to Ethics</div>
+                <div class="reuse-course-lesson">What is <span class="reuse-word" data-reuse-role="mirror">ethics</span>?</div>
+              </div>
+              <div class="reuse-course">
+                <div class="reuse-course-name">Leadership 101</div>
+                <div class="reuse-course-lesson">What is <span class="reuse-word" data-reuse-role="mirror">ethics</span>?</div>
+              </div>
+              <div class="reuse-course">
+                <div class="reuse-course-name">Onboarding</div>
+                <div class="reuse-course-lesson">What is <span class="reuse-word" data-reuse-role="mirror">ethics</span>?</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1529,14 +1545,27 @@
         }, 2200);
       }
 
-      // Reusability scene: after the source "Edited" tag lands, light up the
-      // three course cards with the updated state to show the change propagate.
+      // Reusability scene: user edits a word in the source lesson; the three
+      // courses that reuse it catch up in realtime (staggered). Concrete
+      // visual of the abstract "one edit, everywhere updates" claim.
       if (scene.querySelector('#reuse-scene')) {
-        const courses = scene.querySelectorAll('.reuse-course');
-        courses.forEach(c => c.classList.remove('updated'));
-        setTimeout(() => courses[0]?.classList.add('updated'), 2200);
-        setTimeout(() => courses[1]?.classList.add('updated'), 2500);
-        setTimeout(() => courses[2]?.classList.add('updated'), 2800);
+        const master = scene.querySelector('.reuse-word[data-reuse-role="master"]');
+        const mirrors = scene.querySelectorAll('.reuse-word[data-reuse-role="mirror"]');
+        const RESET = 'ethics';
+        const UPDATED = 'applied ethics';
+        if (master) { master.textContent = RESET; master.classList.remove('edited'); }
+        mirrors.forEach(m => { m.textContent = RESET; m.classList.remove('edited'); });
+        // Master edit lands ~1.8s in, after the caret blinks into view.
+        setTimeout(() => {
+          if (master) { master.textContent = UPDATED; master.classList.add('edited'); }
+        }, 1800);
+        // Each mirror catches up 260ms apart — looks like a live sync.
+        mirrors.forEach((m, i) => {
+          setTimeout(() => {
+            m.textContent = UPDATED;
+            m.classList.add('edited');
+          }, 2200 + i * 260);
+        });
       }
 
       // Quality-of-life roundup: cascade in each row by its data-qol-delay.
