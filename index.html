@@ -96,7 +96,9 @@
     }
     .scene.active { opacity: 1; }
 
-    /* Kinetic type — words slide up + fade in, staggered */
+    /* Kinetic type — words drop in from above, top-down. Subheads wait
+       until the headline has mostly landed so the two rows read in order
+       instead of competing for the viewer's attention. */
     .kt {
       display: inline-block;
       max-width: 1100px;
@@ -110,33 +112,47 @@
     .kt .w {
       display: inline-block;
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(-24px);
       transition: opacity 520ms cubic-bezier(0.2, 0.7, 0.2, 1), transform 520ms cubic-bezier(0.2, 0.7, 0.2, 1);
       margin-right: 0.28em;
     }
     .scene.active .kt .w { opacity: 1; transform: translateY(0); }
 
-    /* Stagger: up to 40 words */
-    .scene.active .kt .w:nth-child(1) { transition-delay: 60ms; }
-    .scene.active .kt .w:nth-child(2) { transition-delay: 140ms; }
-    .scene.active .kt .w:nth-child(3) { transition-delay: 220ms; }
-    .scene.active .kt .w:nth-child(4) { transition-delay: 300ms; }
-    .scene.active .kt .w:nth-child(5) { transition-delay: 380ms; }
-    .scene.active .kt .w:nth-child(6) { transition-delay: 460ms; }
-    .scene.active .kt .w:nth-child(7) { transition-delay: 540ms; }
-    .scene.active .kt .w:nth-child(8) { transition-delay: 620ms; }
-    .scene.active .kt .w:nth-child(9) { transition-delay: 700ms; }
-    .scene.active .kt .w:nth-child(10) { transition-delay: 780ms; }
-    .scene.active .kt .w:nth-child(11) { transition-delay: 860ms; }
-    .scene.active .kt .w:nth-child(12) { transition-delay: 940ms; }
-    .scene.active .kt .w:nth-child(13) { transition-delay: 1020ms; }
-    .scene.active .kt .w:nth-child(14) { transition-delay: 1100ms; }
+    /* Headline stagger — first beat. */
+    .scene.active .headline .w:nth-child(1)  { transition-delay: 60ms; }
+    .scene.active .headline .w:nth-child(2)  { transition-delay: 140ms; }
+    .scene.active .headline .w:nth-child(3)  { transition-delay: 220ms; }
+    .scene.active .headline .w:nth-child(4)  { transition-delay: 300ms; }
+    .scene.active .headline .w:nth-child(5)  { transition-delay: 380ms; }
+    .scene.active .headline .w:nth-child(6)  { transition-delay: 460ms; }
+    .scene.active .headline .w:nth-child(7)  { transition-delay: 540ms; }
+    .scene.active .headline .w:nth-child(8)  { transition-delay: 620ms; }
+    .scene.active .headline .w:nth-child(9)  { transition-delay: 700ms; }
+    .scene.active .headline .w:nth-child(10) { transition-delay: 780ms; }
+    .scene.active .headline .w:nth-child(11) { transition-delay: 860ms; }
+
+    /* Subhead stagger — starts after the headline finishes (~900ms). */
+    .scene.active .subhead .w:nth-child(1)  { transition-delay: 920ms; }
+    .scene.active .subhead .w:nth-child(2)  { transition-delay: 1000ms; }
+    .scene.active .subhead .w:nth-child(3)  { transition-delay: 1080ms; }
+    .scene.active .subhead .w:nth-child(4)  { transition-delay: 1160ms; }
+    .scene.active .subhead .w:nth-child(5)  { transition-delay: 1240ms; }
+    .scene.active .subhead .w:nth-child(6)  { transition-delay: 1320ms; }
+    .scene.active .subhead .w:nth-child(7)  { transition-delay: 1400ms; }
+    .scene.active .subhead .w:nth-child(8)  { transition-delay: 1480ms; }
+    .scene.active .subhead .w:nth-child(9)  { transition-delay: 1560ms; }
+    .scene.active .subhead .w:nth-child(10) { transition-delay: 1640ms; }
+    .scene.active .subhead .w:nth-child(11) { transition-delay: 1720ms; }
+    .scene.active .subhead .w:nth-child(12) { transition-delay: 1800ms; }
+    .scene.active .subhead .w:nth-child(13) { transition-delay: 1880ms; }
+    .scene.active .subhead .w:nth-child(14) { transition-delay: 1960ms; }
+    .scene.active .subhead .w:nth-child(15) { transition-delay: 2040ms; }
 
     .headline {
       font-weight: 600;
-      font-size: clamp(36px, 5vw, 72px);
-      line-height: 1.08;
-      letter-spacing: -0.025em;
+      font-size: clamp(30px, 4vw, 56px);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
       color: var(--fg);
     }
     .subhead {
@@ -1061,7 +1077,6 @@
               <span class="w">brief.</span>
               <span class="w">Or</span>
               <span class="w">a</span>
-              <span class="w">simple</span>
               <span class="w">prompt.</span>
             </div>
             <div class="row subhead">
