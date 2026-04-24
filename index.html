@@ -812,24 +812,30 @@
       letter-spacing: 0.05em;
     }
 
-    /* -------- Opening scene (slash → H1 → type → retype) -------- */
+    /* -------- Opening scene (slash → H1 → type → retype → final) --------
+       Phase 1: slash + menu + typed H1 live in a left-aligned panel
+                (no frame, just sits on the stage).
+       Phase 2: fade phase 1 out, fade a centred final sentence in. */
     .opening-stage {
       position: relative;
-      max-width: 820px;
-      padding: 48px 72px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(15, 15, 28, 0.55);
-      backdrop-filter: blur(4px);
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      max-width: 1100px;
+      min-height: 340px;
+      padding: 0 64px;
     }
+    .opening-compose {
+      position: absolute;
+      left: 64px;
+      top: 24px;
+      max-width: 560px;
+      opacity: 1;
+      transition: opacity 520ms ease;
+    }
+    .opening-compose.fade-out { opacity: 0; }
     .opening-slash-line {
       font-size: 22px;
       color: var(--fg-75);
+      margin-bottom: 14px;
       opacity: 0;
       transition: opacity 260ms ease;
     }
@@ -850,6 +856,7 @@
       padding: 6px;
       width: 280px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
+      margin-bottom: 22px;
       opacity: 0;
       transform: translateY(-6px) scale(0.98);
       transition: opacity 320ms ease, transform 320ms ease;
@@ -864,11 +871,12 @@
     }
     .opening-h1 {
       font-weight: 600;
-      font-size: clamp(30px, 4vw, 56px);
-      line-height: 1.1;
+      font-size: clamp(28px, 3.4vw, 44px);
+      line-height: 1.12;
       letter-spacing: -0.02em;
       color: var(--fg);
       min-height: 1em;
+      text-align: left;
       opacity: 0;
       transition: opacity 320ms ease;
     }
@@ -882,15 +890,39 @@
       margin-left: 4px;
       animation: caret 1s steps(2) infinite;
     }
+    /* Phase 2: final centred sentence after the typing completes. */
+    .opening-final {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 64px;
+      font-weight: 600;
+      font-size: clamp(32px, 4.2vw, 60px);
+      line-height: 1.1;
+      letter-spacing: -0.022em;
+      color: var(--fg);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 620ms cubic-bezier(0.2, 0.7, 0.2, 1),
+                  transform 620ms cubic-bezier(0.2, 0.7, 0.2, 1);
+      pointer-events: none;
+    }
+    .opening-final.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-    /* -------- "No prompt" auto-fill scene -------- */
+    /* -------- "No prompt" — gap suggestion card -------- */
     .autofill-card {
       background: rgba(15, 15, 28, 0.9);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 18px 20px;
       width: 100%;
-      max-width: 460px;
+      max-width: 500px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
     .autofill-header {
@@ -916,17 +948,99 @@
       0%, 100% { opacity: 0.45; transform: scale(1); }
       50%      { opacity: 1;    transform: scale(1.1); }
     }
-    .autofill-empty .autofill-text {
-      color: var(--muted);
-      font-style: italic;
+    /* Inline block suggestion — sits between two existing blocks, with
+       a mint dashed border + accept/dismiss. On accept, it collapses into
+       a regular quote block (accent left-border, italic body). */
+    .suggestion-block {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border: 1px dashed rgba(126, 252, 224, 0.5);
+      background: rgba(126, 252, 224, 0.06);
+      border-radius: 10px;
+      margin: 6px 0;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 420ms ease,
+                  transform 420ms ease,
+                  border 420ms ease,
+                  background 420ms ease,
+                  border-radius 420ms ease,
+                  padding 420ms ease;
     }
-    .autofill-empty.filled .autofill-text {
+    .suggestion-block.show { opacity: 1; transform: translateY(0); }
+    .suggestion-spark {
+      font-size: 16px;
+      color: var(--accent);
+      animation: spark 1.6s ease-in-out infinite;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+    .suggestion-content { flex: 1; min-width: 0; }
+    .suggestion-label {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .suggestion-preview {
+      color: var(--fg-75);
+      font-style: italic;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .suggestion-actions {
+      display: inline-flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .sug-btn {
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-family: inherit;
+    }
+    .sug-accept {
+      background: rgba(126, 252, 224, 0.22);
+      color: var(--accent);
+      transition: box-shadow 260ms ease, background 260ms ease;
+    }
+    .sug-dismiss {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--fg-75);
+    }
+    .sug-accept.pulsing {
+      box-shadow: 0 0 0 4px rgba(126, 252, 224, 0.45);
+      animation: sug-pulse 1.1s ease-in-out infinite;
+    }
+    @keyframes sug-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(126, 252, 224, 0.45); }
+      50%      { box-shadow: 0 0 0 6px rgba(126, 252, 224, 0); }
+    }
+    /* Accepted state: collapse the ghost frame into a quote block. */
+    .suggestion-block.accepted {
+      border: 0;
+      border-left: 3px solid var(--accent);
+      border-radius: 0;
+      background: transparent;
+      padding: 4px 14px;
+    }
+    .suggestion-block.accepted .suggestion-spark,
+    .suggestion-block.accepted .suggestion-label,
+    .suggestion-block.accepted .suggestion-actions {
+      display: none;
+    }
+    .suggestion-block.accepted .suggestion-preview {
       color: var(--fg);
-      font-style: normal;
-      background: rgba(126, 252, 224, 0.16);
-      padding: 0 4px;
-      border-radius: 3px;
-      animation: reuse-flash 720ms ease;
     }
 
     /* -------- Reusability / SCORM comparison mock -------- */
@@ -1160,27 +1274,33 @@
 <body>
   <div class="stage" id="stage">
 
-    <!-- Scene 1: opening — the user types "/", picks Heading 1, types the
-         title, then backspaces "easy" and retypes "effortless". Meta-opener:
-         the headline is written with the product it's pitching. -->
-    <section class="scene" data-scene="0" data-duration="8000">
+    <!-- Scene 1: opening. Phase 1 — compose on the left (type "/", pick
+         Heading 1, type "Creating courses just got easy", retype
+         "effortless"). Phase 2 — fade the compose out and reveal the
+         finished sentence centred. -->
+    <section class="scene" data-scene="0" data-duration="9500">
       <div class="opening-stage">
-        <div class="opening-slash-line" id="opening-slash-line">/<span class="caret"></span></div>
-        <div class="opening-slash-menu" id="opening-slash-menu">
-          <div class="slash-item primary" id="opening-h1-item">
-            Heading 1
-            <span class="desc">Big section heading</span>
+        <div class="opening-compose" id="opening-compose">
+          <div class="opening-slash-line" id="opening-slash-line">/<span class="caret"></span></div>
+          <div class="opening-slash-menu" id="opening-slash-menu">
+            <div class="slash-item primary" id="opening-h1-item">
+              Heading 1
+              <span class="desc">Big section heading</span>
+            </div>
+            <div class="slash-item">
+              Paragraph
+              <span class="desc">Plain paragraph of text</span>
+            </div>
+            <div class="slash-item">
+              Bullet list
+              <span class="desc">Unordered list</span>
+            </div>
           </div>
-          <div class="slash-item">
-            Paragraph
-            <span class="desc">Plain paragraph of text</span>
-          </div>
-          <div class="slash-item">
-            Bullet list
-            <span class="desc">Unordered list</span>
-          </div>
+          <div class="opening-h1" id="opening-h1"><span id="opening-retype"></span><span class="caret"></span></div>
         </div>
-        <div class="opening-h1" id="opening-h1"><span id="opening-retype"></span><span class="caret"></span></div>
+        <div class="opening-final" id="opening-final">
+          Creating courses just got <span class="gradient-word">effortless</span>
+        </div>
       </div>
     </section>
 
@@ -1654,12 +1774,17 @@
       // types the headline ("Creating courses just got easy"), then
       // backspaces "easy" and retypes "effortless". The demo's own
       // opener is written using the product it's selling.
+      const compose   = scene.querySelector('#opening-compose');
       const slashLine = scene.querySelector('#opening-slash-line');
       const slashMenu = scene.querySelector('#opening-slash-menu');
       const h1Item    = scene.querySelector('#opening-h1-item');
       const h1        = scene.querySelector('#opening-h1');
       const retype    = scene.querySelector('#opening-retype');
+      const finalEl   = scene.querySelector('#opening-final');
       if (slashLine && slashMenu && h1 && retype) {
+        // Reset phase-2 too.
+        compose?.classList.remove('fade-out');
+        finalEl?.classList.remove('show');
         // Reset
         slashLine.classList.remove('show');
         slashMenu.classList.remove('show', 'hide');
@@ -1701,6 +1826,11 @@
           }, t);
           t += 82;
         }
+        // Phase 2: after a brief hold on the finished typed line, fade the
+        // left composer out and reveal the same sentence centred on the stage.
+        t += 700;
+        setTimeout(() => compose?.classList.add('fade-out'), t);
+        setTimeout(() => finalEl?.classList.add('show'), t + 260);
       }
 
       // AI writer scene: skeleton for ~1.6s, then a lesson materialises
