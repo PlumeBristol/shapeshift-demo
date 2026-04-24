@@ -819,31 +819,44 @@
     .opening-stage {
       position: relative;
       width: 100%;
-      max-width: 1100px;
       min-height: 340px;
-      padding: 0 64px;
     }
     .opening-compose {
       position: absolute;
       left: 64px;
-      top: 24px;
-      max-width: 560px;
+      top: 56px;
+      max-width: 640px;
       opacity: 1;
       transition: opacity 520ms ease;
     }
     .opening-compose.fade-out { opacity: 0; }
-    .opening-slash-line {
-      font-size: 22px;
-      color: var(--fg-75);
+
+    /* Shared slot — both the "/" prefix and the H1 occupy the same line
+       so when the slash command is accepted, the H1 takes its place
+       rather than dropping down a row. */
+    .opening-line-slot {
+      position: relative;
+      min-height: clamp(36px, 4vw, 52px);
       margin-bottom: 14px;
-      opacity: 0;
+    }
+    .opening-slash-line,
+    .opening-h1 {
+      position: absolute;
+      top: 0;
+      left: 0;
       transition: opacity 260ms ease;
+    }
+    .opening-slash-line {
+      font-size: clamp(28px, 3.4vw, 44px);
+      color: var(--fg-75);
+      line-height: 1.12;
+      opacity: 0;
     }
     .opening-slash-line.show { opacity: 1; }
     .opening-slash-line .caret {
       display: inline-block;
       width: 2px;
-      height: 0.9em;
+      height: 0.85em;
       background: var(--fg);
       vertical-align: text-bottom;
       margin-left: 2px;
@@ -856,7 +869,6 @@
       padding: 6px;
       width: 280px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55);
-      margin-bottom: 22px;
       opacity: 0;
       transform: translateY(-6px) scale(0.98);
       transition: opacity 320ms ease, transform 320ms ease;
@@ -875,10 +887,8 @@
       line-height: 1.12;
       letter-spacing: -0.02em;
       color: var(--fg);
-      min-height: 1em;
       text-align: left;
       opacity: 0;
-      transition: opacity 320ms ease;
     }
     .opening-h1.show { opacity: 1; }
     .opening-h1 .caret {
@@ -890,7 +900,9 @@
       margin-left: 4px;
       animation: caret 1s steps(2) infinite;
     }
-    /* Phase 2: final centred sentence after the typing completes. */
+    /* Phase 2: final sentence — pinned to one line, centred. Font size
+       clamps down on narrow viewports via vw so it always fits on a
+       single row no matter the stage width. */
     .opening-final {
       position: absolute;
       inset: 0;
@@ -898,12 +910,13 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 0 64px;
+      padding: 0 24px;
       font-weight: 600;
-      font-size: clamp(32px, 4.2vw, 60px);
+      font-size: clamp(24px, 3.2vw, 52px);
       line-height: 1.1;
-      letter-spacing: -0.022em;
+      letter-spacing: -0.02em;
       color: var(--fg);
+      white-space: nowrap;
       opacity: 0;
       transform: translateY(6px);
       transition: opacity 620ms cubic-bezier(0.2, 0.7, 0.2, 1),
