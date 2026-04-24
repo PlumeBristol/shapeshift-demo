@@ -527,6 +527,65 @@
       margin: 0 2px;
     }
 
+    /* -------- AI-generated lesson preview (dynamic block materialisation) -------- */
+    .ai-lesson {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ai-block {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 420ms cubic-bezier(0.2, 0.7, 0.2, 1),
+                  transform 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+    .ai-block.in { opacity: 1; transform: translateY(0); }
+    .ai-h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--fg);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .ai-h2 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--fg);
+      margin-top: 6px;
+      letter-spacing: -0.015em;
+    }
+    .ai-p {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--fg-75);
+    }
+    .ai-bullet {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--fg-75);
+      padding-left: 24px;
+      position: relative;
+    }
+    .ai-bullet::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0.7em;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .ai-image {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(126, 252, 224, 0.08), rgba(124, 108, 255, 0.12));
+      border: 1px solid rgba(126, 252, 224, 0.2);
+      border-radius: 10px;
+      margin: 4px 0;
+    }
+
     /* -------- File-upload / course-from-file mock -------- */
     .upload-card {
       background: rgba(15, 15, 28, 0.9);
@@ -1055,7 +1114,7 @@
     </section>
 
     <!-- Scene 5: AI writer -->
-    <section class="scene" data-scene="4" data-duration="6500">
+    <section class="scene" data-scene="4" data-duration="8500">
       <div class="split">
         <div class="left">
           <div class="kt">
@@ -1083,21 +1142,26 @@
           </div>
         </div>
         <div class="right">
-          <div class="editor-card" id="ai-writer-scene" style="min-height: 360px">
-            <p style="color: var(--fg-75); font-size: 15px;">✦ &nbsp;Course outline on applied ethics</p>
-            <div class="ai-skeleton show" id="ai-skeleton" style="margin-top:14px">
+          <div class="editor-card" id="ai-writer-scene" style="min-height: 420px; padding: 24px 28px;">
+            <p style="color: var(--fg-75); font-size: 14px; margin-bottom: 8px;">✦ &nbsp;Write a lesson on applied ethics</p>
+            <div class="ai-skeleton show" id="ai-skeleton" style="margin-top:10px">
               <div class="label">Generating…</div>
               <div class="line" style="width:96%"></div>
               <div class="line" style="width:88%"></div>
               <div class="line" style="width:72%"></div>
             </div>
-            <div class="ai-output" id="ai-output" style="margin-top:14px; display:none;">
-              <div class="outline-row section"><span class="ico ico-section"></span>&nbsp;&nbsp;Foundations of applied ethics</div>
-              <div class="outline-row nested"><span class="ico ico-lesson"></span>&nbsp;&nbsp;When theory meets reality</div>
-              <div class="outline-row nested"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Ethical frameworks at work</div>
-              <div class="outline-row section"><span class="ico ico-section"></span>&nbsp;&nbsp;Workplace dilemmas</div>
-              <div class="outline-row nested"><span class="ico ico-lesson"></span>&nbsp;&nbsp;Whistle-blowing</div>
-              <div class="outline-row nested"><span class="ico ico-quiz"></span>&nbsp;&nbsp;Dilemmas check</div>
+            <div class="ai-lesson" id="ai-output" style="display:none;">
+              <div class="ai-block ai-h1">When theory meets reality</div>
+              <div class="ai-block ai-p">Applied ethics asks what happens when abstract principles bump into lived decisions — at work, at home, online.</div>
+              <div class="ai-block ai-image">
+                <span class="ico ico-lesson" style="opacity:0.55"></span>
+                <span style="margin-left: 10px; color: var(--fg-75); font-size: 13px;">consent-diagram.svg</span>
+              </div>
+              <div class="ai-block ai-h2">Three questions to ask</div>
+              <div class="ai-block ai-bullet">Who is affected, and how?</div>
+              <div class="ai-block ai-bullet">Which principle takes precedence if they conflict?</div>
+              <div class="ai-block ai-bullet">What would you defend in public?</div>
+              <div class="ai-block ai-p">Every framework you'll meet in this course is a different lens on those three questions.</div>
             </div>
           </div>
         </div>
@@ -1153,71 +1217,31 @@
       </div>
     </section>
 
-    <!-- Scene: improved quiz creation -->
-    <section class="scene" data-scene="6" data-duration="6500">
-      <div class="split">
-        <div class="left">
-          <div class="kt">
-            <div class="row headline">
-              <span class="w">Quizzes</span>
-              <span class="w">that</span>
-              <span class="w gradient-word">build</span>
-              <span class="w">themselves</span>
-              <span class="w">out.</span>
-            </div>
-            <div class="row subhead">
-              <span class="w">Every</span>
-              <span class="w">placeholder</span>
-              <span class="w">commits</span>
-              <span class="w">as</span>
-              <span class="w">you</span>
-              <span class="w">type.</span>
-              <span class="w">Type,</span>
-              <span class="w">tick,</span>
-              <span class="w">done.</span>
-            </div>
-          </div>
-        </div>
-        <div class="right">
-          <div class="quiz-card" id="quiz-build-scene">
-            <div class="header">
-              <div class="chip">Q</div>
-              <div class="qtitle">Which branch studies what people actually believe is right?</div>
-            </div>
-            <div class="qfield" data-qdelay="300">A&nbsp;&nbsp;&nbsp;Descriptive ethics<span class="tick">✓</span></div>
-            <div class="qfield" data-qdelay="650">B&nbsp;&nbsp;&nbsp;Normative ethics</div>
-            <div class="qfield" data-qdelay="1000">C&nbsp;&nbsp;&nbsp;Applied ethics</div>
-            <div class="qfield placeholder" data-qdelay="1350">D&nbsp;&nbsp;&nbsp;Add answer</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- Scene: AI quiz generation -->
     <section class="scene" data-scene="7" data-duration="7500">
       <div class="split">
         <div class="left">
           <div class="kt">
             <div class="row headline">
-              <span class="w">Or</span>
-              <span class="w">let</span>
-              <span class="w gradient-word">Claude</span>
-              <span class="w">write</span>
-              <span class="w">the</span>
-              <span class="w">whole</span>
-              <span class="w">quiz.</span>
+              <span class="w">A</span>
+              <span class="w">full</span>
+              <span class="w gradient-word">quiz</span>
+              <span class="w">from</span>
+              <span class="w">one</span>
+              <span class="w">prompt.</span>
             </div>
             <div class="row subhead">
-              <span class="w">One</span>
-              <span class="w">prompt,</span>
-              <span class="w">a</span>
-              <span class="w">full</span>
-              <span class="w">question</span>
-              <span class="w">set — </span>
+              <span class="w">AI</span>
+              <span class="w">picks</span>
+              <span class="w">the</span>
               <span class="w">types,</span>
-              <span class="w">answers,</span>
+              <span class="w">writes</span>
+              <span class="w">the</span>
+              <span class="w">questions,</span>
+              <span class="w">sets</span>
+              <span class="w">the</span>
               <span class="w">correct</span>
-              <span class="w">marks.</span>
+              <span class="w">answers.</span>
             </div>
           </div>
         </div>
@@ -1455,23 +1479,25 @@
         }
       }
 
-      // AI writer scene: skeleton runs for ~1.6s then fades to outline output.
+      // AI writer scene: skeleton for ~1.6s, then a lesson materialises
+      // block-by-block (heading → paragraph → media → bullets → paragraph)
+      // so the viewer sees different content types land, not a flat list.
       const aiSkel = scene.querySelector('#ai-skeleton');
       const aiOut = scene.querySelector('#ai-output');
       if (aiSkel && aiOut) {
         aiSkel.style.opacity = '1';
         aiSkel.style.display = 'block';
         aiOut.style.display = 'none';
-        aiOut.querySelectorAll('.outline-row').forEach(r => r.classList.remove('in'));
+        aiOut.querySelectorAll('.ai-block').forEach(b => b.classList.remove('in'));
         setTimeout(() => {
           aiSkel.style.transition = 'opacity 360ms ease';
           aiSkel.style.opacity = '0';
         }, 1800);
         setTimeout(() => {
           aiSkel.style.display = 'none';
-          aiOut.style.display = 'block';
-          aiOut.querySelectorAll('.outline-row').forEach((r, i) => {
-            setTimeout(() => r.classList.add('in'), i * 160);
+          aiOut.style.display = 'flex';
+          aiOut.querySelectorAll('.ai-block').forEach((b, i) => {
+            setTimeout(() => b.classList.add('in'), i * 220);
           });
         }, 2200);
       }
