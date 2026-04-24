@@ -874,7 +874,7 @@
 
     .reuse-courses {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
     .reuse-course {
@@ -893,6 +893,7 @@
     .scene.active .reuse-course:nth-child(1) { transition-delay: 600ms; }
     .scene.active .reuse-course:nth-child(2) { transition-delay: 760ms; }
     .scene.active .reuse-course:nth-child(3) { transition-delay: 920ms; }
+    .scene.active .reuse-course:nth-child(4) { transition-delay: 1080ms; }
 
     /* Quality-of-life roundup card */
     .qol-card {
@@ -1059,9 +1060,9 @@
               <span class="w">a</span>
               <span class="w">brief.</span>
               <span class="w">Or</span>
-              <span class="w">nothing</span>
-              <span class="w">at</span>
-              <span class="w">all.</span>
+              <span class="w">a</span>
+              <span class="w">simple</span>
+              <span class="w">prompt.</span>
             </div>
             <div class="row subhead">
               <span class="w">Drop</span>
@@ -1344,7 +1345,7 @@
               <div class="title">
                 What is <span class="reuse-word" data-reuse-role="master">ethics</span>?<span class="reuse-caret"></span>
               </div>
-              <div class="hint">Used in 3 courses</div>
+              <div class="hint">Used in 4 courses</div>
             </div>
             <div class="reuse-courses">
               <div class="reuse-course">
@@ -1357,6 +1358,10 @@
               </div>
               <div class="reuse-course">
                 <div class="reuse-course-name">Onboarding</div>
+                <div class="reuse-course-lesson">What is <span class="reuse-word" data-reuse-role="mirror">ethics</span>?</div>
+              </div>
+              <div class="reuse-course">
+                <div class="reuse-course-name">Manager training</div>
                 <div class="reuse-course-lesson">What is <span class="reuse-word" data-reuse-role="mirror">ethics</span>?</div>
               </div>
             </div>
