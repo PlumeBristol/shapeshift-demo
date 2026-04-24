@@ -834,6 +834,7 @@
     .reuse-word {
       display: inline-block;
       padding: 0 3px;
+      min-width: 1ch;
       border-radius: 3px;
       transition: background 420ms ease, color 420ms ease;
     }
@@ -1533,26 +1534,41 @@
         }, 2200);
       }
 
-      // Reusability scene: user edits a word in the source lesson; the three
-      // courses that reuse it catch up in realtime (staggered). Concrete
-      // visual of the abstract "one edit, everywhere updates" claim.
+      // Reusability scene: user physically types the edit on the source
+      // lesson (backspace the old word, type the new one character-by-
+      // character). The three linked courses catch up a beat after the
+      // typing finishes — makes the live-sync feel concrete.
       if (scene.querySelector('#reuse-scene')) {
         const master = scene.querySelector('.reuse-word[data-reuse-role="master"]');
         const mirrors = scene.querySelectorAll('.reuse-word[data-reuse-role="mirror"]');
-        const RESET = 'ethics';
-        const UPDATED = 'applied ethics';
-        if (master) { master.textContent = RESET; master.classList.remove('edited'); }
-        mirrors.forEach(m => { m.textContent = RESET; m.classList.remove('edited'); });
-        // Master edit lands ~1.8s in, after the caret blinks into view.
-        setTimeout(() => {
-          if (master) { master.textContent = UPDATED; master.classList.add('edited'); }
-        }, 1800);
-        // Each mirror catches up 260ms apart — looks like a live sync.
+        const FROM = 'ethics';
+        const TO = 'applied ethics';
+        const DEL_MS = 70;
+        const TYPE_MS = 80;
+
+        if (master) { master.textContent = FROM; master.classList.remove('edited'); }
+        mirrors.forEach(m => { m.textContent = FROM; m.classList.remove('edited'); });
+
+        let t = 1500; // wait for the caret to settle in first
+        // Backspace the old word, character by character.
+        for (let i = FROM.length - 1; i >= 0; i--) {
+          setTimeout(() => { if (master) master.textContent = FROM.slice(0, i); }, t);
+          t += DEL_MS;
+        }
+        t += 180; // micro-pause between delete and type
+        // Type the new word in.
+        for (let i = 1; i <= TO.length; i++) {
+          setTimeout(() => { if (master) master.textContent = TO.slice(0, i); }, t);
+          t += TYPE_MS;
+        }
+        // Flash highlight on the master word once it's fully typed.
+        setTimeout(() => master?.classList.add('edited'), t);
+        // Mirrors catch up one by one, 260ms apart.
         mirrors.forEach((m, i) => {
           setTimeout(() => {
-            m.textContent = UPDATED;
+            m.textContent = TO;
             m.classList.add('edited');
-          }, 2200 + i * 260);
+          }, t + 360 + i * 260);
         });
       }
 
