@@ -670,19 +670,20 @@
     .dropzone.filled .dropzone-empty { opacity: 0; }
     .dropzone.filled .dropzone-file  { opacity: 1; }
 
-    /* Cursor that "drops" the file onto the zone. Starts bottom-right,
-       animates up-left to land over the dropzone centre, then pulses. */
+    /* Cursor that drags a file onto the zone. A semi-transparent "ghost"
+       file chip follows the cursor during the drag, then releases (fades)
+       as the dropzone takes ownership. */
     .drop-cursor {
       position: absolute;
       right: 14%;
       bottom: 10%;
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       opacity: 0;
       transform: translate(40px, 28px) rotate(-8deg);
       filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
       pointer-events: none;
-      z-index: 5;
+      z-index: 6;
       transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1),
                   opacity 240ms ease;
     }
@@ -692,6 +693,42 @@
     }
     .drop-cursor.release {
       transform: translate(-80px, -60px) scale(0.85) rotate(-8deg);
+    }
+    /* Ghost file attached to the cursor while it's "dragging". Sits just
+       to the bottom-right of the cursor icon so it feels held. */
+    .drag-ghost {
+      position: absolute;
+      right: 14%;
+      bottom: 10%;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      background: rgba(18, 18, 31, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--fg-75);
+      font-family: inherit;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 5;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+      transform: translate(60px, 48px) rotate(-4deg);
+      transform-origin: top left;
+      transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 240ms ease;
+    }
+    .drag-ghost.show { opacity: 0.9; }
+    .drag-ghost.land { transform: translate(-62px, -40px) rotate(-4deg); }
+    .drag-ghost.release {
+      opacity: 0;
+      transform: translate(-62px, -40px) scale(0.8) rotate(-4deg);
+    }
+    .drag-ghost .ghost-icon {
+      font-size: 14px;
+      line-height: 1;
     }
     .dropzone .big-icon {
       font-size: 36px;
@@ -973,27 +1010,38 @@
       50%      { opacity: 1;    transform: scale(1.1); }
     }
     /* Inline block suggestion — sits between two existing blocks, with
-       a mint dashed border + accept/dismiss. On accept, it collapses into
-       a regular quote block (accent left-border, italic body). */
+       a mint dashed border + accept/dismiss. Starts at zero height so the
+       paragraph below gets physically pushed down when it appears. On
+       accept, it collapses into a regular quote block (accent left-border,
+       italic body). */
     .suggestion-block {
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      padding: 14px 16px;
-      border: 1px dashed rgba(126, 252, 224, 0.5);
-      background: rgba(126, 252, 224, 0.06);
+      padding: 0 16px;
+      margin: 0;
+      max-height: 0;
+      overflow: hidden;
+      border: 1px dashed rgba(126, 252, 224, 0);
+      background: rgba(126, 252, 224, 0);
       border-radius: 10px;
-      margin: 6px 0;
       opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 420ms ease,
-                  transform 420ms ease,
-                  border 420ms ease,
+      transition: max-height 520ms cubic-bezier(0.2, 0.7, 0.2, 1),
+                  padding 420ms ease,
+                  margin 420ms ease,
+                  opacity 420ms ease 120ms,
+                  border-color 420ms ease,
                   background 420ms ease,
-                  border-radius 420ms ease,
-                  padding 420ms ease;
+                  border-radius 420ms ease;
     }
-    .suggestion-block.show { opacity: 1; transform: translateY(0); }
+    .suggestion-block.show {
+      max-height: 200px;
+      padding: 14px 16px;
+      margin: 8px 0;
+      border-color: rgba(126, 252, 224, 0.5);
+      background: rgba(126, 252, 224, 0.06);
+      opacity: 1;
+    }
     .suggestion-spark {
       font-size: 16px;
       color: var(--accent);
@@ -1052,11 +1100,13 @@
     }
     /* Accepted state: collapse the ghost frame into a quote block. */
     .suggestion-block.accepted {
+      max-height: 200px;
       border: 0;
       border-left: 3px solid var(--accent);
       border-radius: 0;
       background: transparent;
       padding: 4px 14px;
+      margin: 10px 0;
     }
     .suggestion-block.accepted .suggestion-spark,
     .suggestion-block.accepted .suggestion-label,
@@ -1367,6 +1417,10 @@
                   <path d="M3 3 L19 11 L11.5 12 L9 19 Z" fill="#fff" stroke="#09090f" stroke-width="1.4" stroke-linejoin="round"/>
                 </svg>
               </div>
+              <div class="drag-ghost" id="upload-drag-ghost" aria-hidden>
+                <span class="ghost-icon">📄</span>
+                <span>Intro deck.pptx</span>
+              </div>
               <div class="dropzone-empty" id="upload-empty">
                 <div class="big-icon">⇪</div>
                 <div class="fname" style="color: var(--fg-75);">Drop a file here</div>
@@ -1559,12 +1613,11 @@
         <div class="left">
           <div class="kt">
             <div class="row headline">
-              <span class="w">A</span>
-              <span class="w">full</span>
+              <span class="w">Never</span>
+              <span class="w">create</span>
+              <span class="w">a</span>
               <span class="w gradient-word">quiz</span>
-              <span class="w">from</span>
-              <span class="w">one</span>
-              <span class="w">prompt.</span>
+              <span class="w">again.</span>
             </div>
             <div class="row subhead">
               <span class="w">AI</span>
@@ -1767,15 +1820,25 @@
       // its empty state so the loop replays cleanly.
       const dropzone = scene.querySelector('#upload-dropzone');
       const dropCursor = scene.querySelector('#upload-drop-cursor');
+      const dragGhost  = scene.querySelector('#upload-drag-ghost');
       if (dropzone && dropCursor) {
         dropzone.classList.remove('filled');
         dropCursor.classList.remove('show', 'land', 'release');
-        // Cursor fades in, drags toward the dropzone, drops the file.
-        setTimeout(() => dropCursor.classList.add('show'), 300);
-        setTimeout(() => dropCursor.classList.add('land'), 500);
+        dragGhost?.classList.remove('show', 'land', 'release');
+        // Cursor + ghost file fade in, drag together toward the dropzone.
+        setTimeout(() => {
+          dropCursor.classList.add('show');
+          dragGhost?.classList.add('show');
+        }, 300);
+        setTimeout(() => {
+          dropCursor.classList.add('land');
+          dragGhost?.classList.add('land');
+        }, 500);
+        // Drop: dropzone fills, cursor + ghost release.
         setTimeout(() => {
           dropzone.classList.add('filled');
           dropCursor.classList.add('release');
+          dragGhost?.classList.add('release');
         }, 1500);
         setTimeout(() => dropCursor.classList.remove('show'), 1900);
       }
